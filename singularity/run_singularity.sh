@@ -49,7 +49,7 @@ fi
 [ -d "$DATA_DIR" ] || mkdir $DATA_DIR
 [ -d "$HOME/.config/rstudio" ] || mkdir -p $HOME/.config/rstudio
 
-echo "Starting rstudio service on port for user $USER with password $PASSWORD. Visit http://$(hostname -f):$PORT"
+echo "Starting rstudio service on port for user $USER with password $PASSWORD . Visit http://$(hostname -f):$PORT"
 singularity exec \
 	--bind $RSTUDIO_TMP/run:/run \
 	--bind $RSTUDIO_TMP/var-lib-rstudio-server:/var/lib/rstudio-server \
