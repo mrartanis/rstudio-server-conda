@@ -10,7 +10,7 @@ function gen_passwd ()
 
 function get_free_port ()
 {
-    for p in $1; do
+    for p in $*; do
 	if ! nc -z localhost "$p"; then
 	    echo $p
 	    return 0
