@@ -1,13 +1,34 @@
 #!/bin/bash
 
 # See also https://www.rocker-project.org/use/singularity/
+function gen_passwd ()
+{
+    local l=$1;
+    [ "$l" == "" ] && l=12;
+    gtr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
+}
+
+function get_free_port ()
+{
+    for p in $1; do
+	if ! nc -z localhost "$p"; then
+	    echo $p
+	    return 0
+	fi
+    done
+    return 1
+}
 
 # Main parameters for the script with default values
-PORT=${PORT:-8787}
+PORT_RANGE=$(echo {63000..63100})
+PORT=$(get_free_port $PORT_RANGE)
 USER=$(whoami)
-PASSWORD=${PASSWORD:-notsafe}
+PASSWORD=$(gen_passwd)
 TMPDIR=${TMPDIR:-tmp}
 CONTAINER="rstudio_latest.sif"  # path to singularity container (will be automatically downloaded)
+DATA_DIR=$HOME/data
+
+[[ ! -z $PORT ]] || (echo "Unable to find free port"; exit 1)
 
 # Set-up temporary paths
 RSTUDIO_TMP="${TMPDIR}/$(echo -n $CONDA_PREFIX | md5sum | awk '{print $1}')"
@@ -25,6 +46,9 @@ if [ -z "$CONDA_PREFIX" ]; then
   exit 1
 fi
 
+[ -d "$DATA_DIR" ] || mkdir $DATA_DIR
+[ -d "$HOME/.config/rstudio" ] || mkdir -p $HOME/.config/rstudio
+
 echo "Starting rstudio service on port $PORT ..."
 singularity exec \
 	--bind $RSTUDIO_TMP/run:/run \
@@ -36,7 +60,7 @@ singularity exec \
 	--bind ${CONDA_PREFIX}:${CONDA_PREFIX} \
 	--bind $HOME/.config/rstudio:/home/rstudio/.config/rstudio \
         `# add additional bind mount required for your use-case` \
-	--bind /data:/data \
+	--bind $DATA_DIR:/data \
 	--env CONDA_PREFIX=$CONDA_PREFIX \
 	--env RSTUDIO_WHICH_R=$R_BIN \
 	--env RETICULATE_PYTHON=$PY_BIN \
@@ -45,5 +69,4 @@ singularity exec \
 	--env USER=$USER \
 	rstudio_latest.sif \
 	/init.sh
-
 

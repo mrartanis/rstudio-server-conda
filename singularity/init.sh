@@ -3,7 +3,7 @@
 source /opt/conda/etc/profile.d/conda.sh && \
   conda activate $CONDA_PREFIX && \
   rserver \
-    --www-address=127.0.0.1 \
+    --www-address=:: \
     --www-port=$PORT \
     --rsession-which-r=$RSTUDIO_WHICH_R \
     --rsession-ld-library-path=$CONDA_PREFIX/lib \
