@@ -5,7 +5,7 @@ function gen_passwd ()
 {
     local l=$1;
     [ "$l" == "" ] && l=12;
-    gtr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
+    tr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} 
 }
 
 function get_free_port ()
